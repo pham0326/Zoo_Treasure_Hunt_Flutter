@@ -1,121 +1,144 @@
+// lib/main.dart
+// Entry point + list screen for the Flutter port of Zoo Treasure Hunt.
+// Migration notes:
+//  - Compose's @Composable ListScreen becomes a StatefulWidget.
+//  - LazyColumn { items(...) } becomes ListView.builder.
+//  - remember { mutableStateOf(...) } becomes State fields + setState(...).
+//  - Persistence now goes through AnimalRepository (shared_preferences),
+//    replacing the Kotlin FileSightingRepository's JSON-file approach.
+//  - Loading from storage is asynchronous (a Future), so the screen shows
+//    a loading spinner until the saved data arrives. In Compose this would
+//    be a LaunchedEffect + loading state; here it's an async load in
+//    initState driving setState.
+
 import 'package:flutter/material.dart';
+import 'animal.dart';
+import 'animal_repository.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ZooApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ZooApp extends StatelessWidget {
+  const ZooApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Zoo Treasure Hunt',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const ListScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class ListScreen extends StatefulWidget {
+  const ListScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<ListScreen> createState() => _ListScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _ListScreenState extends State<ListScreen> {
+  final AnimalRepository _repository = AnimalRepository();
 
-  void _incrementCounter() {
+  List<Animal> _animals = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAnimals();
+  }
+
+  Future<void> _loadAnimals() async {
+    final loaded = await _repository.loadAnimals();
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _animals = loaded;
+      _isLoading = false;
     });
+  }
+
+  void _toggleFound(int index) {
+    setState(() {
+      _animals[index] = _animals[index].copyWith(
+        isFound: !_animals[index].isFound,
+      );
+    });
+    _repository.saveAnimals(_animals);
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final foundCount = _animals.where((a) => a.isFound).length;
+
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
+        title: const Text('Zoo Treasure Hunt'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    'Found $foundCount of ${_animals.length} animals',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _animals.length,
+                    itemBuilder: (context, index) {
+                      final animal = _animals[index];
+                      return AnimalCard(
+                        animal: animal,
+                        onTap: () => _toggleFound(index),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
+    );
+  }
+}
+
+class AnimalCard extends StatelessWidget {
+  final Animal animal;
+  final VoidCallback onTap;
+
+  const AnimalCard({super.key, required this.animal, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: ListTile(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            animal.imageUrl,
+            width: 56,
+            height: 56,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.pets, size: 56),
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        title: Text(animal.name),
+        subtitle: Text(animal.isFound ? 'FOUND!' : 'Not found yet'),
+        trailing: Icon(
+          animal.isFound ? Icons.check_circle : Icons.circle_outlined,
+          color: animal.isFound ? Colors.green : Colors.grey,
+        ),
+        onTap: onTap,
       ),
     );
   }
