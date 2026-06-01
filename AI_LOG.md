@@ -19,7 +19,7 @@ and the required prompts/output appendix.
 
 ---
 
-### Step 2.2 — Seed data (5 animals)
+### Step 2.2 - Seed data (5 animals)
 **Intent:** Port Kotlin getDefaultSightings() to Dart
 **AI output summary:** getDefaultAnimals() returning List<Animal>, same 5 animals,
 same image URLs and Adelaide coordinates as the Android app
@@ -30,7 +30,7 @@ same image URLs and Adelaide coordinates as the Android app
 
 ---
 
-### Step 2.3 — List UI (ListScreen + AnimalCard)
+### Step 2.3 - List UI (ListScreen + AnimalCard)
 **Intent:** Port Compose ListScreen + AnimalCard to Flutter widgets
 **AI output summary:** Replaced starter counter app in main.dart with a
 StatefulWidget ListScreen using ListView.builder, plus an AnimalCard
@@ -53,7 +53,7 @@ remember/mutableStateOf; Flutter uses StatefulWidget + setState.
 **State-loss observation:** "Found" state is in-memory only. Confirmed by quitting and restarting the app — Giraffe + Kangaroo reverted to "Not found".
 This motivates the persistence step (2.5) and demonstrates how the new platform handles storage differently.
 
-### Step 2.4 — Persistence (shared_preferences)
+### Step 2.4 - Persistence (shared_preferences)
 **Intent:** Port Kotlin FileSightingRepository (JSON in filesDir) to Flutter
 **AI output summary:** AnimalRepository using shared_preferences; load on
 startup (initState), save on toggle. main.dart updated with async load +
@@ -72,7 +72,7 @@ only). Flutter = shared_preferences key/value; plugin picks platform storage
 **Time:** ~15 min
 
 ## Phase 3
-### Step 3.1 — Camera sensor (image_picker)
+### Step 3.1 - Camera sensor (image_picker)
 **Intent:** Port Kotlin camera flow (TakePicture + FileProvider + manual CAMERA
 permission) to Flutter
 **AI output summary:** Added image_picker; camera button on each card calls
