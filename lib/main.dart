@@ -51,6 +51,7 @@ class _ListScreenState extends State<ListScreen> {
 
   List<Animal> _animals = [];
   bool _isLoading = true;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -97,9 +98,46 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
+  void _viewPhoto(Animal animal) {
+    if (animal.photoPath == null) return;
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                animal.name,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Image.file(File(animal.photoPath!)),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final foundCount = _animals.where((a) => a.isFound).length;
+
+    final filteredAnimals =
+        _animals
+            .where(
+              (a) => a.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+            )
+            .toList()
+          ..sort((a, b) {
+            if (a.isFound == b.isFound) return 0;
+            return a.isFound ? -1 : 1;
+          });
 
     return Scaffold(
       appBar: AppBar(
@@ -112,23 +150,65 @@ class _ListScreenState extends State<ListScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Text(
-                    'Found $foundCount of ${_animals.length} animals',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  child: Column(
+                    children: [
+                      Text(
+                        'Found $foundCount of ${_animals.length} animals',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: _animals.isEmpty
+                              ? 0
+                              : foundCount / _animals.length,
+                          minHeight: 8,
+                          backgroundColor: Colors.grey.shade300,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search by animal name',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      isDense: true,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: _animals.length,
-                    itemBuilder: (context, index) {
-                      final animal = _animals[index];
-                      return AnimalCard(
-                        animal: animal,
-                        onTap: () => _toggleFound(index),
-                        onCapture: () => _capturePhoto(index),
-                      );
-                    },
-                  ),
+                  child: filteredAnimals.isEmpty
+                      ? const Center(child: Text('No matching animals 🐾'))
+                      : ListView.builder(
+                          itemCount: filteredAnimals.length,
+                          itemBuilder: (context, index) {
+                            final animal = filteredAnimals[index];
+                            // Find the real index in _animals so toggle/capture
+                            // operate on the correct item, not the filtered one.
+                            final realIndex = _animals.indexOf(animal);
+                            return AnimalCard(
+                              animal: animal,
+                              onTap: () => _viewPhoto(animal),
+                              onToggleFound: () => _toggleFound(realIndex),
+                              onCapture: () => _capturePhoto(realIndex),
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
@@ -138,13 +218,15 @@ class _ListScreenState extends State<ListScreen> {
 
 class AnimalCard extends StatelessWidget {
   final Animal animal;
-  final VoidCallback onTap;
-  final VoidCallback onCapture;
+  final VoidCallback onTap; // view photo (card body)
+  final VoidCallback onToggleFound; // toggle found (check icon)
+  final VoidCallback onCapture; // open camera (camera icon)
 
   const AnimalCard({
     super.key,
     required this.animal,
     required this.onTap,
+    required this.onToggleFound,
     required this.onCapture,
   });
 
@@ -179,7 +261,13 @@ class AnimalCard extends StatelessWidget {
           child: _buildThumbnail(),
         ),
         title: Text(animal.name),
-        subtitle: Text(animal.isFound ? 'FOUND!' : 'Not found yet'),
+        subtitle: Text(
+          animal.photoPath != null
+              ? (animal.isFound
+                    ? 'FOUND! (tap to view photo)'
+                    : 'Tap to view photo')
+              : (animal.isFound ? 'FOUND!' : 'Not found yet'),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -188,9 +276,13 @@ class AnimalCard extends StatelessWidget {
               tooltip: 'Capture photo',
               onPressed: onCapture,
             ),
-            Icon(
-              animal.isFound ? Icons.check_circle : Icons.circle_outlined,
-              color: animal.isFound ? Colors.green : Colors.grey,
+            IconButton(
+              icon: Icon(
+                animal.isFound ? Icons.check_circle : Icons.circle_outlined,
+                color: animal.isFound ? Colors.green : Colors.grey,
+              ),
+              tooltip: 'Toggle found',
+              onPressed: onToggleFound,
             ),
           ],
         ),

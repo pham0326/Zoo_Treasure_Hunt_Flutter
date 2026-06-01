@@ -90,3 +90,18 @@ BUT native permission declarations are still per-platform and NOT unified:
 - iOS: NSCameraUsageDescription key WITH a justification string (Apple shows +
   reviews it). Two files, two styles -> "write once" doesn't cover native perms.
 **Time:** ~20 min
+
+### Step 4 - Polish (beyond minimum)
+**Intent:** Add progress bar, search/filter, sort found-to-top, tap-to-view photo
+**AI output summary:** LinearProgressIndicator header; TextField search with
+case-insensitive filter; ..sort cascade to float found to top; showDialog
+full-photo viewer; check-circle became IconButton so card-tap = view photo.
+**Did it compile first try?** Yes, all via hot reload (r).
+**Hallucinations / wrong APIs:** None.
+**State-management trap I had to reason about (NOT blindly accept):** filtering
+changes list indices. Passing the filtered index to toggle/capture would hit the
+WRONG animal. Fixed by looking up realIndex = _animals.indexOf(animal). This is
+exactly the kind of subtle off-by-one an AI can introduce — caught by testing.
+**Flutter win:** hot reload (r) applied each change in <1s without losing app
+state — far faster than Android Studio's rebuild cycle.
+**Time:** ~25 min
