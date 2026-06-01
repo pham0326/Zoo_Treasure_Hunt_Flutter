@@ -9,7 +9,7 @@ This log captures prompts, AI output summaries, hallucinations, wins, and time p
 ---
 
 ## Phase 2 - Core Migration (animal list + Found-state persistence)
-### Step 2.1 — Data model (Animal class)
+### Step 2.1 - Data model (Animal class)
 **Intent:** Port the Kotlin `Sighting` data class to Dart as an `Animal` class.
 
 **AI output summary:** Full Animal class with named constructor, copyWith(), toJson(), and factory fromJson(). Fields: name, isFound, notes, timestamp, imageUrl, photoPath (nullable), latitude, longitude.
