@@ -1,15 +1,8 @@
-// lib/main.dart
 // Entry point + list screen for the Flutter port of Zoo Treasure Hunt.
-// Migration notes:
-//  - Compose ListScreen -> StatefulWidget; LazyColumn -> ListView.builder;
-//    remember/mutableStateOf -> setState.
-//  - Persistence via AnimalRepository (shared_preferences), replacing the
-//    Kotlin FileSightingRepository JSON-file approach.
-//  - Camera: the Kotlin app used ActivityResultContracts.TakePicture() with
-//    FileProvider + file_paths.xml + manual CAMERA permission. Here the
-//    image_picker plugin collapses all of that into a single async call
-//    (_picker.pickImage). The returned XFile.path is stored on the Animal
-//    and shown as the card thumbnail via Image.file.
+// Ntes:
+//  - Compose ListScreen -> StatefulWidget; LazyColumn -> ListView.builder; remember/mutableStateOf -> setState.
+//  - Persistence via AnimalRepository (shared_preferences), replacing the Kotlin FileSightingRepository JSON-file approach.
+//  - Camera: the Kotlin app used ActivityResultContracts.TakePicture() with FileProvider + file_paths.xml + manual CAMERA permission. Here the image_picker plugin collapses all of that into a single async call (_picker.pickImage). The returned XFile.path is stored on the Animal and shown as the card thumbnail via Image.file.
 
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -218,9 +211,9 @@ class _ListScreenState extends State<ListScreen> {
 
 class AnimalCard extends StatelessWidget {
   final Animal animal;
-  final VoidCallback onTap; // view photo (card body)
-  final VoidCallback onToggleFound; // toggle found (check icon)
-  final VoidCallback onCapture; // open camera (camera icon)
+  final VoidCallback onTap;
+  final VoidCallback onToggleFound;
+  final VoidCallback onCapture;
 
   const AnimalCard({
     super.key,

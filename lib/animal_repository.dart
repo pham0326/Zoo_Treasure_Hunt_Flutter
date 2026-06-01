@@ -1,12 +1,8 @@
-// lib/animal_repository.dart
 // Persistence layer, ported from the Kotlin FileSightingRepository.
-// Migration note:
-// Kotlin wrote a JSON file to context.filesDir and managed the file
-// handle, read/write, and serialization manually.
+// Note:
+// Kotlin wrote a JSON file to context.filesDir and managed the file handle, read/write, and serialization manually.
 // Here, shared_preferences stores a single JSON string under one key.
-//    The plugin decides where the data physically lives on each platform
-//    (SharedPreferences on Android, NSUserDefaults on iOS, etc.), so the
-//    same Dart code persists data on every target platform.
+// The plugin decides where the data physically lives on each platform (SharedPreferences on Android, NSUserDefaults on iOS, etc.), so the same Dart code persists data on every target platform.
 
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
