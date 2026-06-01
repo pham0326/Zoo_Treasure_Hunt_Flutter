@@ -11,6 +11,7 @@ This log captures prompts, AI output summaries, hallucinations, wins, and time p
 ## Phase 2 - Core Migration (animal list + Found-state persistence)
 ### Step 2.1 — Data model (Animal class)
 **Intent:** Port the Kotlin `Sighting` data class to Dart as an `Animal` class.
+
 **AI output summary:** Full Animal class with named constructor, copyWith(), toJson(), and factory fromJson(). Fields: name, isFound, notes, timestamp, imageUrl, photoPath (nullable), latitude, longitude.
 
 **Did it compile first try?** Yes - flutter analyze lib/animal. dart returned "No issues found!"
@@ -68,6 +69,8 @@ remember/mutableStateOf; Flutter uses StatefulWidget + setState.
 **State-loss observation:** "Found" state is in-memory only. Confirmed by quitting and restarting the app — Giraffe + Kangaroo reverted to "Not found".
 This motivates the persistence step (2.5) and demonstrates how the new platform handles storage differently.
 
+---
+
 ### Step 2.4 - Persistence (shared_preferences)
 **Intent:** Port Kotlin FileSightingRepository (JSON in filesDir) to Flutter
 
@@ -83,6 +86,8 @@ the Flutter plugin still depends on Kotlin underneath -> the "cross-platform" ab
 **Storage difference:** Kotlin = manual JSON file in context.filesDir (Android only). Flutter = shared_preferences key/value; plugin picks platform storage (SharedPreferences NSUserDefaults), same Dart works on all platforms.
 
 **Time:** ~15 min
+
+---
 
 ## Phase 3
 ### Step 3.1 - Camera sensor (image_picker)
@@ -103,7 +108,7 @@ BUT native permission declarations are still per-platform and NOT unified:
   reviews it). Two files, two styles -> "write once" doesn't cover native perms.
 **Time:** ~20 min
 
-### Step 4 - Polish (beyond minimum)
+### Step 3.2 - Polish 
 **Intent:** Add progress bar, search/filter, sort found-to-top, tap-to-view photo.
 
 **AI output summary:** LinearProgressIndicator header; TextField search with case-insensitive filter; ..sort cascade to float found to top; showDialog full-photo viewer; check-circle became IconButton so card-tap = view photo.
