@@ -70,3 +70,23 @@ abstraction leaks.
 only). Flutter = shared_preferences key/value; plugin picks platform storage
 (SharedPreferences/NSUserDefaults), same Dart works on all platforms.
 **Time:** ~15 min
+
+## Phase 3
+### Step 3.1 — Camera sensor (image_picker)
+**Intent:** Port Kotlin camera flow (TakePicture + FileProvider + manual CAMERA
+permission) to Flutter
+**AI output summary:** Added image_picker; camera button on each card calls
+_picker.pickImage(source: camera); XFile.path saved on Animal + persisted;
+thumbnail switches to Image.file when a photo exists.
+**Did it compile first try?** Yes. Camera opened on emulator, photo captured,
+thumbnail updated, marked FOUND, persisted.
+**Hallucinations / wrong APIs:** None. Used `flutter pub add` -> image_picker 1.2.2.
+**Migration note — Sensor Permissions per platform:**
+Kotlin: FileProvider + file_paths.xml + <provider> in manifest + manual runtime
+CAMERA permission dance. Flutter image_picker: one async call
+(_picker.pickImage), plugin handles FileProvider + permission internally.
+BUT native permission declarations are still per-platform and NOT unified:
+- Android: one line <uses-permission android:name="android.permission.CAMERA"/>
+- iOS: NSCameraUsageDescription key WITH a justification string (Apple shows +
+  reviews it). Two files, two styles -> "write once" doesn't cover native perms.
+**Time:** ~20 min
