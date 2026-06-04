@@ -8,6 +8,21 @@ This log captures prompts, AI output summaries, hallucinations, wins, and time p
 
 ---
 
+## Phase 1 - Understand the Assignment & Set Up
+**Intent:** Understand the Assignment, Analyse existing Android project & Set Up
+
+**AI output summary:** Fully explained about the assignment and guided me through the set up.
+
+**Did it compile first try?** Yes 
+
+**Hallucinations / wrong APIs:** None.
+
+**What I changed:** Nothing, used as-is.
+
+**Time:** ~20 min
+
+--- 
+
 ## Phase 2 - Core Migration (animal list + Found-state persistence)
 ### Step 2.1 - Data model (Animal class)
 **Intent:** Port the Kotlin `Sighting` data class to Dart as an `Animal` class.
@@ -20,7 +35,7 @@ This log captures prompts, AI output summaries, hallucinations, wins, and time p
 
 **What I changed:** Nothing, used as-is.
 
-**Time:** ~5 min
+**Time:** ~10 min
 
 **Migration note - boilerplate explosion:** One Kotlin line
 (`data class Sighting(...)`) became ~90 lines of Dart. Dart has no `data class` keyword, so copyWith (Kotlin's .copy), equality, and toString must be written by hand. fromJson/toJson replace the JSON handling that kotlinx.serialization / the Kotlin repository did. Newer Dart options (freezed package, or Dart 3 records) could reduce this; hand-written version chosen for clarity and to avoid an extra build dependency.
@@ -106,10 +121,10 @@ BUT native permission declarations are still per-platform and NOT unified:
 - Android: one line <uses-permission android:name="android.permission.CAMERA"/>
 - iOS: NSCameraUsageDescription key WITH a justification string (Apple shows +
   reviews it). Two files, two styles -> "write once" doesn't cover native perms.
-**Time:** ~20 min
+**Time:** ~30 min
 
 ### Step 3.2 - Polish 
-**Intent:** Add progress bar, search/filter, sort found-to-top, tap-to-view photo.
+**Intent:** Progress bar, search/filter, sort found-to-top, tap-to-view photo.
 
 **AI output summary:** LinearProgressIndicator header; TextField search with case-insensitive filter; ..sort cascade to float found to top; showDialog full-photo viewer; check-circle became IconButton so card-tap = view photo.
 
@@ -121,4 +136,4 @@ BUT native permission declarations are still per-platform and NOT unified:
 
 **Flutter win:** hot reload (r) applied each change in <1s without losing app state - far faster than Android Studio's rebuild cycle.
 
-**Time:** ~25 min
+**Time:** ~30 min

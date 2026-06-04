@@ -191,8 +191,6 @@ class _ListScreenState extends State<ListScreen> {
                           itemCount: filteredAnimals.length,
                           itemBuilder: (context, index) {
                             final animal = filteredAnimals[index];
-                            // Find the real index in _animals so toggle/capture
-                            // operate on the correct item, not the filtered one.
                             final realIndex = _animals.indexOf(animal);
                             return AnimalCard(
                               animal: animal,
