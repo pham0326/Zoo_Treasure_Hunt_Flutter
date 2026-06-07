@@ -1,6 +1,6 @@
 # zoo_treasure_hunt_flutter
 
-A new Flutter project.
+A new Flutter project. A Flutter port of the Zoo Treasure Hunt zoo animal sighting tracker, by Dora Pham - migrated from the original Android app for COMP2012 Assessment 3.
 
 ## Getting Started
 
